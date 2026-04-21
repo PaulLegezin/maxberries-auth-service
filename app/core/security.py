@@ -56,6 +56,5 @@ def decode_token(token: str) -> TokenData:
 
         return TokenData(user_id=user_id, permissions=permissions)
 
-    except (JWTError, ValidationError) as e:
-        print(f"DEBUG DECODE ERROR: {e}")  # СМОТРИ СЮДА В КОНСОЛИ
+    except (JWTError, ValidationError):
         return None

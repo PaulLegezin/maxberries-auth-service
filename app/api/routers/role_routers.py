@@ -3,12 +3,14 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import admin_required, get_db
+from app.api.dependencies import admin_required, check_permission, get_db
 from app.schemas.role import RoleCreate, RoleResponse
 from app.services.role_service import RoleManagementService
 
 router = APIRouter(
-    prefix="/role", tags=["Role"], dependencies=[Depends(admin_required)]
+    prefix="/role",
+    tags=["Role"],
+    dependencies=[Depends(admin_required), Depends(check_permission("role.access"))],
 )
 
 

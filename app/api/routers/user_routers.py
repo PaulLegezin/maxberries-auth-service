@@ -4,13 +4,15 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import admin_required, get_db
+from app.api.dependencies import admin_required, check_permission, get_db
 from app.core.security import get_pwd_hash
 from app.schemas.user import UserCreateAdmin, UserResponse, UserUpdate
 from app.services.user_service import UserManagementService
 
 router = APIRouter(
-    prefix="/user", tags=["User"], dependencies=[Depends(admin_required)]
+    prefix="/user",
+    tags=["User"],
+    dependencies=[Depends(admin_required), Depends(check_permission("user.access"))],
 )
 
 

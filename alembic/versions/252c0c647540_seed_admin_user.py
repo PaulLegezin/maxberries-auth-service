@@ -71,10 +71,39 @@ def upgrade() -> None:
         "('admin', 'Суперюзер') ON CONFLICT DO NOTHING"
     )
 
+    permissions_to_add = [
+        ("user.access", "Доступ к работе с пользователями"),
+        ("role.access", "Доступ к работе с ролями"),
+        ("permission.access", "Доступ к работе с разрешениями"),
+    ]
+
+    for code, desc in permissions_to_add:
+        op.execute(
+            sa.text(
+                "INSERT INTO permissions (code, description) "
+                "VALUES (:code, :desc) ON CONFLICT DO NOTHING"
+            ).bindparams(code=code, desc=desc)
+        )
+
     connection = op.get_bind()
     admin_role_id = connection.execute(
         sa.text("SELECT id FROM roles WHERE name = 'admin'")
     ).scalar()
+
+    perm_ids = connection.execute(
+        sa.text(
+            "SELECT id FROM permissions WHERE code IN "
+            "('user.access', 'role.access', 'permission.access')"
+        )
+    ).fetchall()
+
+    for row in perm_ids:
+        op.execute(
+            sa.text(
+                "INSERT INTO roles_permissions (role_id, permission_id) "
+                "VALUES (:r_id, :p_id) ON CONFLICT DO NOTHING"
+            ).bindparams(r_id=admin_role_id, p_id=row[0])
+        )
 
     password_hash = get_pwd_hash("admin_password_123")
     op.execute(
